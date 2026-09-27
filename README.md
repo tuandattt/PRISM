@@ -1,4 +1,7 @@
-# PRISM
+# PRISM: PRIvileged Sibling-guided Multi-Agent Topology Design
+
+Official implementation of **PRISM: PRIvileged Sibling-guided Multi-Agent
+Topology Design**.
 
 Privileged-teacher, on-policy self-distillation (OPSD) for multi-agent topology
 design, built on [ARG-Designer](https://arxiv.org/abs/2507.18224). A teacher that
@@ -305,10 +308,10 @@ python -m experiment.opsd.run_opsd ... --anchor_weight 0.0
 If you use PRISM, please cite:
 
 ```bibtex
-@article{<key>,
- title={PRISM: <full title>},
- author={<Last, First and Last, First>},
- journal={arXiv preprint arXiv:<id>},
+@article{dat2026prism,
+ title={PRISM: PRIvileged Sibling-guided Multi-Agent Topology Design},
+ author={Dat, Phuong Tuan and Li, Qi and Wang, Xinchao},
+ journal={preprint},
  year={2026}
 }
 ```
