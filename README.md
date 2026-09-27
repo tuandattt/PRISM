@@ -300,6 +300,21 @@ python -m experiment.opsd.run_opsd ... --anchor_weight 0.0
 
 ---
 
+## Citation
+
+If you use PRISM, please cite:
+
+```bibtex
+@article{<key>,
+ title={PRISM: <full title>},
+ author={<Last, First and Last, First>},
+ journal={arXiv preprint arXiv:<id>},
+ year={2026}
+}
+```
+
+---
+
 ## Acknowledgments
 
 Built on [ARG-Designer](https://arxiv.org/abs/2507.18224) (Li et al., AAAI 2026),
