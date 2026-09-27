@@ -1,0 +1,57 @@
+# ARG-Designer framework env (NOT the vLLM server env - keep vLLM in its own env).
+#
+# torch: install a CUDA build matching your NVIDIA driver, e.g. for CUDA 12.4:
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+# then: pip install -r requirements.txt
+
+# --- core: autoregressive model + graph ---
+torch_geometric
+networkx
+numpy
+
+# --- sentence embeddings (role/task encoding) ---
+# NOTE: MUST stay <3.0. ST >=3.0 transitively imports HuggingFace `datasets`,
+# which collides with this repo's local `datasets/` folder (a namespace pkg
+# with no __init__.py). ST >=5.0 also pulls torchcodec (needs CUDA-13 libs).
+sentence-transformers==2.7.0
+
+# --- LLM client (OpenAI-compatible; works with OpenAI API or a local vLLM host) ---
+openai
+aiohttp
+tenacity
+tiktoken
+python-dotenv
+
+# --- framework plumbing ---
+# astunparse is NOT optional: mas_framework/agents/__init__.py imports the code
+# executor, so a missing astunparse breaks every agent import, GSM8K included.
+astunparse
+# phx-class-registry, NOT the abandoned `class-registry` on PyPI: the latter is
+# stuck at 2.1.2 and imports pkg_resources, which setuptools >= 81 no longer
+# ships -- so a fresh env fails at `from class_registry import ClassRegistry`.
+# Both provide the same `class_registry` module and the same API.
+phx-class-registry
+shortuuid
+loguru
+pyyaml
+pydantic
+tqdm
+
+# --- optional: only needed for the search/reader/vgen TOOLS, not the
+#     GSM8K/MMLU/AQuA math or core run path. Install if you use those tools:
+# arxiv bs4 python-docx python-pptx PyPDF2 pytube wikipedia
+# google-api-python-client markdown openpyxl pandas pylatexenc requests httpx
+
+# --- vLLM backend ---
+# Install vLLM in a SEPARATE environment (it pins its own torch build):
+#   pip install vllm
+#   CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-7B-Instruct --port 8000
+# then set BASE_URL=http://localhost:8000/v1 in .env
+
+# --- MixChain-Z-PRM12K training corpus (datasets/MixChain/download.py) ---
+# The HF `datasets` library is deliberately NOT used: this repo has its own
+# top-level datasets/ directory which shadows it on sys.path. The parquet
+# files are pulled through huggingface_hub and read with pandas instead,
+# and pandas needs a parquet engine that it only imports at read time.
+huggingface_hub
+pyarrow
