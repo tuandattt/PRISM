@@ -51,7 +51,7 @@ def _check_backend(model: str) -> None:
         f"  Looked for: {_DOTENV}",
         f"  Fix: cp template.env .env   (BASE_URL=http://localhost:8000/v1)",
         f"       or: export BASE_URL=http://localhost:8000/v1 API_KEY=EMPTY",
-        f"  Verify: python scripts/check_vllm.py --llm_name {model}",
+        f"  Verify: curl http://localhost:8000/v1/models   (must list '{model}')",
     ]))
 
 MAX_CONCURRENCY = int(os.getenv("LLM_MAX_CONCURRENCY", "32"))

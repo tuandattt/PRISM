@@ -52,10 +52,10 @@ already included:
 |---|---|
 | GSM8K | `datasets/gsm8k/gsm8k.jsonl` |
 | AQuA | `datasets/AQuA/AQuA.jsonl` |
-| HumanEval | `datasets/humaneval/humaneval-py.jsonl` |
+| HumanEval | `datasets/humaneval/humaneval-py.jsonl` (evaluation only) |
 | MMLU | `datasets/MMLU/data/` (re-download with `python datasets/MMLU/download.py`) |
 | MultiArith, SVAMP | `datasets/MultiArith/`, `datasets/SVAMP/` (evaluation only) |
-| MBPP | `datasets/MBPP/mbpp.jsonl` (evaluation only) |
+| MBPP | `datasets/MBPP/mbpp.jsonl` |
 
 MixChain-Z-PRM12K, a math corpus used only for training, is not included. Fetch
 it with `python datasets/MixChain/download.py`, run from the repo root.
@@ -63,11 +63,6 @@ it with `python datasets/MixChain/download.py`, run from the repo root.
 > Do **not** `pip install datasets` (HuggingFace) into this environment. The
 > local `datasets/` folder is a namespace package, and the HF library would
 > shadow it. This is also why `sentence-transformers` is pinned to `2.7.0`.
-
-The helper scripts referenced below (`check_vllm.py`, `smoke_opsd.py`,
-`e2e_opsd_synthetic.py`) are in `scripts/` of the OPSD_ARG_Designer repo.
-Copy that folder as well if you want them:
-`Copy-Item -Recurse G:\Code\OPSD_ARG_Designer\scripts G:\Code\PRISM\scripts`.
 
 ---
 
@@ -145,24 +140,9 @@ Qwen2.5-7B in bf16 needs about 16 GB of VRAM. On a smaller card, serve
 `Qwen/Qwen2.5-1.5B-Instruct`; accuracy from that model is not comparable. In
 either case, pass the same model id as `--llm_name`.
 
-Check the backend before starting a long run:
-
-```bash
-python scripts/check_vllm.py --llm_name Qwen/Qwen2.5-7B-Instruct
-```
-
 ---
 
-## 4. Offline sanity checks (no LLM, no GPU)
-
-```bash
-python scripts/smoke_opsd.py            # unit checks on the OPSD machinery
-python scripts/e2e_opsd_synthetic.py    # full Stage 1 -> 2 -> reload on synthetic data
-```
-
----
-
-## 5. Running the pipeline (GSM8K example)
+## 4. Running the pipeline (GSM8K example)
 
 `MODEL=Qwen/Qwen2.5-7B-Instruct` is used below. Substitute your own model id.
 
@@ -201,14 +181,6 @@ python -m experiment.opsd.run_opsd \
 
 Add `--dry_run` first. It loads the graphs, privileged table and rollout pool,
 prints them and stops. Data-plumbing errors show up in seconds this way.
-
-**Go/no-go check.** At the end of Stage 1 the script prints the teacher's NLL
-with and without the rationale:
-
-```
-[teacher] epoch 40/40 loss=1.83 val=1.91 val_nopriv=2.24 |film|=3.41
-[opsd] GO/NO-GO -- teacher NLL improves by 0.3300 nats when the rationale is visible.
-```
 
 If the gain is close to zero, the teacher is not using the privileged
 information. Stop there, because distillation cannot help.
@@ -251,7 +223,7 @@ python experiment/evaluate_math.py --model_path output/<run_dir> \
 
 ---
 
-## 6. Other datasets
+## 5. Other datasets
 
 The pattern is the same for each dataset: `cold_start_<ds>.py`, then
 `finetune_<ds>.py --pretrain`, then `run_opsd --dataset <ds>`, then evaluate.
@@ -268,7 +240,7 @@ To fit one teacher on several corpora, pass
 
 ---
 
-## 7. Useful OPSD ablations
+## 6. Useful OPSD ablations
 
 ```bash
 # privileged dropout only, no distillation
@@ -287,19 +259,6 @@ python -m experiment.opsd.run_opsd ... --anchor_weight 0.0
 ```
 
 `python -m experiment.opsd.run_opsd --help` lists every flag.
-
----
-
-## 8. Troubleshooting
-
-| symptom | fix |
-|---|---|
-| `ModuleNotFoundError: datasets.gsm8k_dataset` | run from the repo root; the `datasets/` folder must sit next to `experiment/` |
-| `ImportError` from HF `datasets` / sentence-transformers | `pip install sentence-transformers==2.7.0` and `pip uninstall datasets` |
-| `No module named class_registry` / `pkg_resources` | `pip install phx-class-registry` (not `class-registry`) |
-| connection refused / model not found | check `BASE_URL` in `.env`; `--llm_name` must be exactly the model id given to `vllm serve` |
-| requests time out under load | lower `LLM_MAX_CONCURRENCY` in `.env` |
-| `task_split_<ds>.json` not found | run Stage 0 (cold start) first |
 
 ---
 
