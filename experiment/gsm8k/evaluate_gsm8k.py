@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument('--task_split_path', type=str,
                         default=task_split_file("gsm8k"),
                         help="Path to task split JSON file")
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini",
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct",
                         help="Name of the LLM to use")
     parser.add_argument('--decision_method', type=str, default="FinalRefer",
                         help="Decision method for the final node")

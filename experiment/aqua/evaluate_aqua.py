@@ -32,7 +32,7 @@ def parse_args():
                         help="Path to trained model directory")
     parser.add_argument('--dataset_path', type=str, default=dataset_file("aqua"))
     parser.add_argument('--task_split_path', type=str, default=task_split_file("aqua"))
-    parser.add_argument('--llm_name', type=str, default="gpt-4o")
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument('--decision_method', type=str, default="FinalRefer")
     parser.add_argument('--output_file', type=str, default=None,
                         help="Per-question results. Default: derived from the model dir, "

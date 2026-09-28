@@ -1,10 +1,9 @@
 """OpenAI-compatible chat client.
 
-Works against the real OpenAI API and against any OpenAI-compatible server,
-notably a local vLLM host serving e.g. ``Qwen/Qwen2.5-7B-Instruct``.
+Talks to a local vLLM server serving e.g. ``Qwen/Qwen2.5-7B-Instruct``.
 
 Environment (.env):
-    BASE_URL          e.g. http://localhost:8000/v1  (empty -> real OpenAI)
+    BASE_URL          e.g. http://localhost:8000/v1  (required)
     API_KEY           vLLM ignores the value but the client requires one
     LLM_MAX_CONCURRENCY   cap on in-flight requests (default 32)
     LLM_TIMEOUT           per-request timeout in seconds (default 180)
@@ -26,28 +25,28 @@ from mas_framework.llm.price import cost_count, record_usage
 
 # Resolve .env from the repo root explicitly. Bare load_dotenv() walks up from
 # the *calling module's* directory, which silently finds nothing depending on how
-# a script was launched -- and a missing BASE_URL does not fail, it quietly points
-# the client at api.openai.com. Shell exports still win: load_dotenv does not
+# a script was launched, and a missing BASE_URL must fail loudly (see
+# _check_backend). Shell exports still win: load_dotenv does not
 # override variables already set.
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 _DOTENV = os.path.join(_REPO_ROOT, '.env')
 load_dotenv(_DOTENV if os.path.exists(_DOTENV) else None)
 
-MINE_BASE_URL = os.getenv("BASE_URL") or None          # None -> default OpenAI endpoint
-MINE_API_KEY = os.getenv("API_KEY") or os.getenv("OPENAI_API_KEY") or "EMPTY"
+MINE_BASE_URL = os.getenv("BASE_URL") or None
+MINE_API_KEY = os.getenv("API_KEY") or "EMPTY"
 
 
 def _check_backend(model: str) -> None:
-    """Refuse to send a self-hosted model id to OpenAI with a placeholder key.
+    """Refuse to run without a vLLM server URL.
 
-    Without this the failure surfaces as a 401 from api.openai.com several
-    minutes into a run, which reads like a credentials problem rather than what
-    it is: BASE_URL never reached the client.
+    Without BASE_URL the OpenAI client falls back to api.openai.com, and the
+    failure surfaces as a 401 several minutes into a run, which reads like a
+    credentials problem rather than what it is: BASE_URL never reached the client.
     """
-    if MINE_BASE_URL or model.startswith(("gpt-", "o1", "o3", "o4", "chatgpt")):
+    if MINE_BASE_URL:
         return
     raise RuntimeError("\n".join([
-        f"BASE_URL is not set, so requests for '{model}' would go to api.openai.com.",
+        f"BASE_URL is not set, so there is no vLLM server to send '{model}' requests to.",
         f"  Looked for: {_DOTENV}",
         f"  Fix: cp template.env .env   (BASE_URL=http://localhost:8000/v1)",
         f"       or: export BASE_URL=http://localhost:8000/v1 API_KEY=EMPTY",

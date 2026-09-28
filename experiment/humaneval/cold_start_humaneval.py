@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('--task_split_file', type=str, default=None,
                         help="Where the index split is written. Override alongside "
                              "--output_dir for the same reason.")
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini")
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct")
     parser.add_argument('--agent_names', nargs='+', type=str, default=['CodeWriting'],
                         help='Specify agent names as a list of strings')
     parser.add_argument('--decision_method', type=str, default="FinalWriteCode",

@@ -18,8 +18,7 @@ Stage 2  OPSD: rollout -> teacher KL    no LLM   (replaces D_pruned)
 Stage 3  evaluation                     LLM calls; the teacher is discarded
 ```
 
-The LLM backend can be any OpenAI-compatible endpoint (a local vLLM server or a
-hosted API). You choose it in `.env`.
+The LLM runs on a local vLLM server, and `.env` points the pipeline at it.
 
 ---
 
@@ -66,34 +65,12 @@ it with `python datasets/MixChain/download.py`, run from the repo root.
 
 ---
 
-## 2. Installation
-
-Use two environments. vLLM pins its own torch build, so keep it out of the
-framework environment.
+## 2. Environment setup
 
 ```bash
-# --- framework env (Python 3.10–3.12) ---
-python -m venv .venv
-# Windows: .venv\Scripts\activate    Linux/macOS: source .venv/bin/activate
-
-# torch built for your CUDA driver, e.g. CUDA 12.4:
-pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+conda create -n prism python=3.10 -y
+conda activate prism
 pip install -r requirements.txt
-```
-
-```bash
-# --- vLLM env (Linux or WSL2 only, on the GPU host) ---
-python -m venv .venv-vllm && source .venv-vllm/bin/activate
-pip install vllm
-```
-
-If your home directory has a small quota, redirect the HuggingFace cache with a
-**shell export**. Do not put it in `.env`, because `huggingface_hub` reads it at
-import time:
-
-```bash
-export HF_HOME=/path/with/space/.cache/huggingface
-export VLLM_CACHE_ROOT=/path/with/space/.cache/vllm
 ```
 
 ---
@@ -101,21 +78,16 @@ export VLLM_CACHE_ROOT=/path/with/space/.cache/vllm
 ## 3. Configure the LLM backend
 
 ```bash
-cp template.env .env        # PowerShell: Copy-Item template.env .env
+cp template.env .env 
 ```
-
-**Local vLLM** (default):
 
 ```ini
 BASE_URL = "http://localhost:8000/v1"
 API_KEY  = "EMPTY"
-LLM_MAX_CONCURRENCY = 32    # parallel requests sent to the server
+LLM_MAX_CONCURRENCY = 32   
 LLM_TIMEOUT = 180
 LLM_MAX_RETRIES = 5
 ```
-
-**Hosted OpenAI API**: leave `BASE_URL = ""`, set `API_KEY` / `OPENAI_API_KEY`,
-and pass `--llm_name gpt-4o-mini` to every command.
 
 Optional path overrides (the defaults are `<repo>/data` and `<repo>/output`):
 
@@ -126,7 +98,7 @@ ARG_OUTPUT_ROOT = ""
 
 ### Serve the model with vLLM
 
-In the vLLM env, run:
+Start the server:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 vllm serve Qwen/Qwen2.5-7B-Instruct --port 8000
@@ -238,29 +210,6 @@ The pattern is the same for each dataset: `cold_start_<ds>.py`, then
 To fit one teacher on several corpora, pass
 `--teacher_dataset gsm8k aqua --extra_data_dir data/ColdStartData_aqua`.
 
----
-
-## 6. Useful OPSD ablations
-
-```bash
-# privileged dropout only, no distillation
-python -m experiment.opsd.run_opsd ... --privileged_dropout 0.5 --opsd_epochs 0
-# control: rationales shuffled onto the wrong queries (run next to every headline number)
-python -m experiment.opsd.run_opsd ... --privileged_control shuffle
-# privileged source: context | rationale | sibling_graph | graph_stats | gold_graph
-python -m experiment.opsd.run_opsd ... --privileged_source graph_stats
-# KL direction
-python -m experiment.opsd.run_opsd ... --kl_direction forward
-python -m experiment.opsd.run_opsd ... --kl_direction jsd --jsd_beta 0.5
-# teacher-as-verifier filtering of rollouts
-python -m experiment.opsd.run_opsd ... --pseudo_filter teacher --teacher_keep_frac 0.5
-# no NLL anchor
-python -m experiment.opsd.run_opsd ... --anchor_weight 0.0
-```
-
-`python -m experiment.opsd.run_opsd --help` lists every flag.
-
----
 
 ## Citation
 

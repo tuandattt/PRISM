@@ -48,7 +48,7 @@ def parse_cli_args():
     parser.add_argument('--finetune_epochs', type=int, default=100, help="Number of finetuning epochs")
     parser.add_argument('--finetune_lr', type=float, default=5e-5, help="Learning rate for finetuning")
 
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini", help="LLM model name")
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct", help="LLM model name")
     parser.add_argument('--domain', type=str, default="mmlu", help="Task domain")
     parser.add_argument('--decision_method', type=str, default="FinalRefer", help="Decision method for final node")
     parser.add_argument('--agent_names', nargs='+', type=str, default=['AnalyzeAgent'], help="Names of agents")

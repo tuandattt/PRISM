@@ -41,7 +41,7 @@ def parse_args():
                              "sibling to show. Pass sparse families to avoid that.")
     parser.add_argument('--dataset_json', type=str, default=dataset_file("gsm8k"),
                         help="Path to GSM8K JSONL dataset")
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini",
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct",
                         help="Name of the LLM model to use")
     parser.add_argument('--agent_names', nargs='+', type=str, default=['MathSolver'],
                         help='List of agent names')

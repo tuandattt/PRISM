@@ -28,7 +28,7 @@ def parse_args():
                         help="HumanEval dataset path")
     parser.add_argument('--task_split_path', type=str, default=task_split_file("humaneval"),
                         help="Task split file path")
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini", help="LLM name")
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct", help="LLM name")
     parser.add_argument('--decision_method', type=str, default="FinalWriteCode",
                         help="Decision method for the final node")
     parser.add_argument('--output_file', type=str, default=None,

@@ -35,7 +35,7 @@ def parse_args():
                         help="batch size")
     parser.add_argument('--num_rounds', type=int, default=1,
                         help="number of inference rounds per query")
-    parser.add_argument('--llm_name', type=str, default="gpt-4o-mini",
+    parser.add_argument('--llm_name', type=str, default="Qwen/Qwen2.5-7B-Instruct",
                         help="LLM model name")
     parser.add_argument('--domain', type=str, default="mmlu",
                         help="dataset name")
