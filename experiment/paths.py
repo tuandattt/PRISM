@@ -26,9 +26,9 @@ DATASET_FILES = {
     # solution. Used to train a designer that is then evaluated on the other
     # math benchmarks, so there is no train/test overlap to control for.
     'mixchain': os.path.join(REPO_ROOT, 'datasets', 'MixChain', 'mixchain.jsonl'),
-    # Code, evaluation-only. Written in HumanEval's record shape by
-    # datasets/MBPP/download.py, so evaluate_humaneval reads it via
-    # --dataset_path with no new evaluator.
+    # Code, training-only (the code designer is evaluated on HumanEval). Written
+    # in HumanEval's record shape by datasets/MBPP/download.py, so the HumanEval
+    # cold start / finetune scripts read it via --dataset_json.
     'mbpp': os.path.join(REPO_ROOT, 'datasets', 'MBPP', 'mbpp.jsonl'),
 }
 

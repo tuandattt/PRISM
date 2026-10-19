@@ -1,5 +1,7 @@
 # PRISM: PRIvileged Sibling-guided Multi-Agent Topology Design
 
+[📄 Paper](https://arxiv.org/abs/2610.20628) | [🌐 Project Page](https://tuandattt.github.io/prism_project_web/)
+
 Official implementation of **PRISM: PRIvileged Sibling-guided Multi-Agent
 Topology Design**.
 
@@ -7,9 +9,7 @@ Privileged-teacher, on-policy self-distillation (OPSD) for multi-agent topology
 design, built on [ARG-Designer](https://arxiv.org/abs/2507.18224). A teacher that
 sees the query **and its gold rationale** gives dense per-step supervision to a
 query-only student. The supervision is applied to pseudo-graphs that the student
-samples itself. This replaces ARG-Designer's Stage 2 (`D_pruned`) and its
-generate, ablate and re-execute LLM loop with a distillation step that makes
-**no LLM calls**.
+samples itself.
 
 ```
 Stage 0  cold start on D_exp            LLM calls: the only LLM cost
@@ -52,9 +52,9 @@ already included:
 | GSM8K | `datasets/gsm8k/gsm8k.jsonl` |
 | AQuA | `datasets/AQuA/AQuA.jsonl` |
 | HumanEval | `datasets/humaneval/humaneval-py.jsonl` (evaluation only) |
-| MMLU | `datasets/MMLU/data/` (re-download with `python datasets/MMLU/download.py`) |
+| MMLU | `datasets/MMLU/data/`: `dev` for training, `test` for evaluation (re-download with `python datasets/MMLU/download.py`) |
 | MultiArith, SVAMP | `datasets/MultiArith/`, `datasets/SVAMP/` (evaluation only) |
-| MBPP | `datasets/MBPP/mbpp.jsonl` |
+| MBPP | `datasets/MBPP/mbpp.jsonl` (training only) |
 
 MixChain-Z-PRM12K, a math corpus used only for training, is not included. Fetch
 it with `python datasets/MixChain/download.py`, run from the repo root.
@@ -204,8 +204,32 @@ The pattern is the same for each dataset: `cold_start_<ds>.py`, then
 |---|---|---|
 | AQuA | `experiment/aqua/` | `aqua` |
 | MMLU | `experiment/mmlu/` | `mmlu` |
-| HumanEval | `experiment/humaneval/` | `humaneval` |
+| MBPP (train-only code corpus) | `experiment/humaneval/` (pointed at MBPP, see below) | not supported yet |
 | MixChain (train-only math corpus) | `experiment/mixchain/` | `mixchain` |
+
+MMLU trains on the `dev` split (cold start, finetune, OPSD). `evaluate_mmlu.py`
+scores on the `test` split.
+
+### MBPP (code)
+
+MBPP is the training corpus for the code designer, and HumanEval is used only
+for evaluation. MBPP has no scripts of its own, so it runs through the HumanEval
+scripts. Point them at `mbpp.jsonl`, and give MBPP its own output paths:
+
+```bash
+cd experiment/humaneval
+python cold_start_humaneval.py --llm_name Qwen/Qwen2.5-7B-Instruct \
+    --dataset_json ../../datasets/MBPP/mbpp.jsonl \
+    --output_dir ../../data/ColdStartData_mbpp \
+    --task_split_file ../../data/task_split_mbpp.json
+python finetune_humaneval.py --pretrain --llm_name Qwen/Qwen2.5-7B-Instruct \
+    --dataset_json ../../datasets/MBPP/mbpp.jsonl \
+    --cold_start_dir ../../data/ColdStartData_mbpp \
+    --task_split_file ../../data/task_split_mbpp.json
+# HumanEval never took part in training, so score every problem with --full_test
+python evaluate_humaneval.py --model_path <run_dir> --full_test \
+    --llm_name Qwen/Qwen2.5-7B-Instruct
+```
 
 To fit one teacher on several corpora, pass
 `--teacher_dataset gsm8k aqua --extra_data_dir data/ColdStartData_aqua`.

@@ -195,7 +195,7 @@ def load_records(dataset):
         from datasets.mmlu_dataset import MMLUDataset
         rows = []
         # 'dev', NOT 'val'. cold_start_mmlu and finetune_mmlu build their graphs
-        # from dev; evaluate_mmlu scores on val. Reading val here was wrong twice
+        # from dev; evaluate_mmlu scores on test. Reading val here was wrong twice
         # over: the task-split indices are into dev, so records[i] returned a
         # DIFFERENT question than the graph at that index (no rollout query ever
         # matched a graph, and the pool came back empty) -- and had they matched,

@@ -212,7 +212,9 @@ async def main(ef=None):
 
     print("Loading MMLU dataset...")
     download()
-    dataset_test = MMLUDataset('val')
+    # Scored on the held-out test split. dev is the training split (cold start,
+    # finetune, OPSD); val is unused.
+    dataset_test = MMLUDataset('test')
 
     print(f"Loading Sentence Transformer model: {args.embedding_model}")
     sentence_model = SentenceTransformer(args.embedding_model)
